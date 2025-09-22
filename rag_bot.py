@@ -6,6 +6,8 @@ from langchain_ollama import ChatOllama
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain.chains import RetrievalQA
+from langchain.chains import ConversationalRetrievalChain
+from langchain.memory import ConversationBufferMemory
 from dotenv import load_dotenv
 
 load_dotenv()  
@@ -47,10 +49,17 @@ retriever = vectorstore.as_retriever(
 # 7. Connect retriever + LLM into a QA chain
 llm = ChatOllama(model="wizardlm2:latest")
 
-qa_chain = RetrievalQA.from_chain_type(
+# Memory to store chat history
+memory = ConversationBufferMemory(
+    memory_key="chat_history", 
+    return_messages=True
+)
+
+qa_chain = ConversationalRetrievalChain.from_llm(
     llm=llm,
     retriever=retriever,
-    chain_type="stuff" 
+    memory=memory,
+    chain_type="stuff"
 )
 
 # 8. Test the chatbot
@@ -58,6 +67,6 @@ while True:
     query = input("\nAsk me questions: ")
     if query.lower() == "exit":
         break
-    answer = qa_chain.invoke(query)
-    print("\CHATBOT:", answer)
+    result = qa_chain.invoke({"question": query})
+    print("\nCHATBOT:", result["answer"])
 
