@@ -10,7 +10,7 @@ from PIL import Image, UnidentifiedImageError
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using device:", device)
 
-# 3. Transforms (resize -> tensor -> normalize)
+# 3. Transforms images to tensors and normalizes
 transform = transforms.Compose([
     transforms.Resize((128, 128)),
     transforms.ToTensor(),
@@ -18,7 +18,7 @@ transform = transforms.Compose([
                          [0.5, 0.5, 0.5])
 ])
 
-# 4. Dataset (PetImages has broken images, so handle errors)
+# 4. Clean Dataset class to handle corrupted images
 class CleanDataset(datasets.ImageFolder):
     def __getitem__(self, index):
         while True:
@@ -28,9 +28,9 @@ class CleanDataset(datasets.ImageFolder):
                 index = (index + 1) % len(self.samples)
 
 dataset = CleanDataset("archive/PetImages", transform=transform)
-print("Classes:", dataset.classes)  # ['Cat', 'Dog']
+print("Classes:", dataset.classes)  
 
-# 5. Split into train/val
+# 5. Split into train and validation sets
 train_size = int(0.8 * len(dataset))
 val_size = len(dataset) - train_size
 train_data, val_data = random_split(dataset, [train_size, val_size])
