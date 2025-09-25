@@ -40,7 +40,7 @@ class SimpleNN(nn.Module):
 
 model = SimpleNN()
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+optimizer = optim.SGD(model.parameters(), lr=0.001)
 
 epochs = 5
 for epoch in range(epochs):
