@@ -7,13 +7,13 @@ import matplotlib.pyplot as plt
 
 # 1. Load and preprocess data
 data = pd.read_csv("TSLA.csv")
-data = data[['Close']]  # use only closing price
+data = data[['Close']]  # using only closing price
 
 scaler = MinMaxScaler(feature_range=(0, 1))
 scaled_data = scaler.fit_transform(data)
 
 # 2. Create sequences
-def create_sequences(data, seq_len5gth):
+def create_sequences(data, seq_length):
     x, y = [], []
     for i in range(len(data) - seq_length):
         x.append(data[i:i+seq_length])
@@ -25,9 +25,9 @@ x, y = create_sequences(scaled_data, seq_length)
 
 # Convert to tensors
 x = torch.tensor(x, dtype=torch.float32)
-y = torch.tensor(y, dtype=torch.float32).view(-1, 1)  # shape (n_samples, 1)
+y = torch.tensor(y, dtype=torch.float32).view(-1, 1) 
 
-# 3. Train/Test split (sequential)
+# 3. Train/Test split 
 train_size = int(len(x) * 0.8)
 x_train, x_test = x[:train_size], x[train_size:]
 y_train, y_test = y[:train_size], y[train_size:]
@@ -36,12 +36,12 @@ y_train, y_test = y[:train_size], y[train_size:]
 class StockPricePredictor(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers):
         super(StockPricePredictor, self).__init__()
-        self.lstm = nn.GRU(input_size, hidden_size, num_layers, batch_first=True)
+        self.gru = nn.GRU(input_size, hidden_size, num_layers, batch_first=True)
         self.fc = nn.Linear(hidden_size, 1)
 
     def forward(self, x):
-        out, _ = self.lstm(x)
-        out = self.fc(out[:, -1, :])  # last hidden state
+        out, _ = self.gru(x)
+        out = self.fc(out[:, -1, :])  # take output of last time step
         return out
 
 input_size = 1
@@ -91,7 +91,6 @@ def predict_future(data, model, scaler, seq_length, num_predictions):
     predictions = scaler.inverse_transform(np.array(predictions).reshape(-1, 1))
     return predictions
 
-# Get user input for future predictions
 num_predictions = int(input("Enter the number of future days to predict: "))
 future_predictions = predict_future(scaled_data, model, scaler, seq_length, num_predictions)
 
