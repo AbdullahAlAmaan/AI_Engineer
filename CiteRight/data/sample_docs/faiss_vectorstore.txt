@@ -1,0 +1,18 @@
+FAISS (Facebook AI Similarity Search) is a library for efficient similarity search and clustering of dense vectors. It provides several key advantages for RAG systems:
+
+Performance: FAISS is optimized for speed and can handle millions of vectors efficiently. It supports both CPU and GPU acceleration.
+
+Scalability: The library can scale to billions of vectors while maintaining fast search times through various indexing strategies.
+
+Index Types: FAISS offers multiple index types including:
+- Flat indexes for exact search
+- IVF (Inverted File) indexes for approximate search
+- HNSW (Hierarchical Navigable Small World) for high-dimensional vectors
+- PQ (Product Quantization) for memory efficiency
+
+Integration: FAISS integrates well with popular ML frameworks and can be easily incorporated into RAG pipelines.
+
+Memory Management: The library provides efficient memory management and supports both in-memory and disk-based storage.
+
+FAISS is particularly useful in RAG systems where you need to quickly retrieve the most relevant document chunks from a large corpus based on semantic similarity to the user's query.
+

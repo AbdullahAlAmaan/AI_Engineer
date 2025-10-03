@@ -1,0 +1,15 @@
+Retrieval-Augmented Generation (RAG) is a powerful technique that combines the strengths of information retrieval and text generation. RAG systems work by first retrieving relevant documents from a knowledge base and then using those documents as context to generate more accurate and grounded responses.
+
+The RAG process typically involves several key steps:
+
+1. Document Ingestion: Raw documents are processed and split into manageable chunks
+2. Embedding Generation: Each chunk is converted into a dense vector representation using embedding models
+3. Indexing: Vectors are stored in a vector database like FAISS for efficient similarity search
+4. Query Processing: User queries are also converted to embeddings
+5. Retrieval: Similar documents are found using vector similarity search
+6. Generation: The retrieved context is used to generate a response using a language model
+
+RAG systems are particularly effective because they can access up-to-date information and provide citations for their responses, making them more trustworthy than traditional language models that rely solely on their training data.
+
+Hybrid retrieval combines both dense vector search (semantic similarity) and sparse keyword search (BM25) to improve recall and ensure that both semantically similar and keyword-relevant documents are retrieved.
+

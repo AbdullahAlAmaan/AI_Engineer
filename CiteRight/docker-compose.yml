@@ -1,0 +1,33 @@
+version: "3.8"
+services:
+  api:
+    build: .
+    ports: ["8000:8000"]
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    volumes:
+      - ./:/app
+    depends_on: [ollama]
+  ui:
+    image: python:3.11-slim
+    working_dir: /app
+    command: bash -lc "pip install -r requirements.txt && streamlit run ui/streamlit_app.py --server.port 8501 --server.address 0.0.0.0"
+    ports: ["8501:8501"]
+    environment:
+      - API_URL=http://api:8000
+    volumes:
+      - ./:/app
+    depends_on: [api]
+  ollama:
+    image: ollama/ollama:latest
+    ports: ["11434:11434"]
+    volumes:
+      - ollama:/root/.ollama
+    healthcheck:
+      test: ["CMD", "bash", "-lc", "ollama --version"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+volumes:
+  ollama:
+

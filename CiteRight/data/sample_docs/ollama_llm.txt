@@ -1,0 +1,20 @@
+Ollama is a tool that makes it easy to run large language models locally on your machine. It provides a simple API for interacting with various open-source LLMs without requiring cloud services.
+
+Key features of Ollama:
+
+Local Execution: Models run entirely on your local machine, ensuring privacy and reducing latency.
+
+Model Management: Ollama handles downloading, updating, and managing different model versions automatically.
+
+API Interface: Provides a RESTful API that's compatible with OpenAI's format, making it easy to integrate with existing applications.
+
+Resource Efficiency: Optimized for local execution with support for different hardware configurations.
+
+Model Library: Supports a wide range of open-source models including Llama, Mistral, CodeLlama, and many others.
+
+Custom Models: Allows you to create and run custom model configurations.
+
+Ollama is particularly valuable for RAG systems because it enables you to run powerful language models locally, ensuring data privacy while maintaining high performance. The wizardlm2 model is known for its strong reasoning capabilities and instruction-following behavior, making it well-suited for generating accurate responses in RAG applications.
+
+The tool integrates seamlessly with RAG pipelines by providing a simple HTTP API that can be called from Python applications to generate responses based on retrieved context.
+
