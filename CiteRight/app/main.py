@@ -9,7 +9,7 @@ from app.rag.retriever import hybrid_search
 from app.rag.reranker import CrossEncoderReranker
 from app.rag.generator import generate_with_ollama
 from app.rag.selective_reask import should_reask
-from app.rag.utils import build_context, format_citations, chunk_text
+from app.rag.utils import build_context, format_citations, chunk_text, diversify_sources
 from app.rag.evaluator import evaluate_answer
 from app.logging_utils import timer, log_json
 from app.deps import reranker, cache, vectorstore
@@ -156,6 +156,9 @@ def query(req: QueryRequest):
     # Rerank
     with timer("rerank"):
         top_docs, scores = reranker().rerank(q, candidates, top_k=settings.RERANK_TOP_K)
+    
+    # Diversify sources to ensure balanced representation
+    top_docs = diversify_sources(top_docs, max_per_source=2)
 
     # Context build
     context = build_context(top_docs, settings.CONTEXT_TOP_K)

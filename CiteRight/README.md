@@ -1,410 +1,310 @@
-# CiteRight-Multiverse 🌌
+# CiteRight 🎯
 
-A production-ready multi-source RAG (Retrieval-Augmented Generation) assistant that pulls content from Wikipedia, Wikidata, StackExchange, and arXiv for comprehensive factual synthesis.
+A multi-source RAG (Retrieval-Augmented Generation) assistant that pulls content from **Wikipedia, StackExchange, arXiv, and Wikidata** for accurate, well-cited answers.
 
-## Features
+## ✨ Key Features
 
-- **Multi-Source Ingestion**: Automatically pulls content from Wikipedia, StackExchange, arXiv, and Wikidata
-- **Hybrid Retrieval**: Combines FAISS (dense) + BM25 (sparse) search
-- **Cross-Encoder Reranking**: Improves relevance with sentence-transformers
-- **Selective Re-ask**: Automatically refines answers when confidence is low
-- **Local LLM**: Uses Ollama with wizardlm2:latest model
-- **Structured Citations**: Proper attribution with source, origin, license, and URL metadata
-- **Caching**: SQLite-based query caching for performance
-- **FastAPI Backend**: RESTful API with comprehensive logging
-- **Streamlit UI**: Enhanced web interface with multi-source controls
-- **Docker Support**: Complete containerization with docker-compose
+- **Multi-Source Intelligence**: Pulls from 4 authoritative sources
+- **Fresh Data Every Time**: No stale cached results
+- **Citation Diversity**: Maximum 2 citations per source for balanced answers
+- **Quality Evaluation**: Optional metrics (faithfulness, accuracy, precision)
+- **PDF Upload**: Add your own documents
+- **Local & Private**: Everything runs on your machine with Ollama
 
-## Data Sources
+## 🚀 Quick Start (3 Steps)
 
-| Source | Content Type | License | API |
-|--------|-------------|---------|-----|
-| **Wikipedia** | Encyclopedia articles | CC BY-SA 3.0 | wikipedia library |
-| **StackExchange** | Q&A content | CC BY-SA 4.0 | StackAPI |
-| **arXiv** | Research papers | CC BY 4.0 | arxiv library |
-| **Wikidata** | Structured data | CC0 1.0 | Wikidata API |
-
-## Quickstart
-
-### Prerequisites
-
-1. **Install Ollama** and pull the wizardlm2 model:
-   ```bash
-   # Install Ollama (if not already installed)
-   curl -fsSL https://ollama.ai/install.sh | sh
-   
-   # Pull the model
-   ollama pull wizardlm2:latest
-   ```
-
-2. **Start Ollama service**:
-   ```bash
-   ollama serve
-   ```
-
-### Option 1: Docker Compose (Recommended)
-
-1. **Start everything**:
-   ```bash
-   docker compose up --build
-   ```
-
-2. **Access the application**:
-   - API: http://localhost:8000
-   - UI: http://localhost:8501
-
-### Option 2: Local Development
-
-1. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-2. **Start the API**:
-   ```bash
-   uvicorn app.main:app --host 0.0.0.0 --port 8000
-   ```
-
-3. **Start the UI** (in another terminal):
-   ```bash
-   streamlit run ui/streamlit_app.py
-   ```
-
-## Usage
-
-### Multi-Source Ingestion
-
-1. **Query-Based Ingestion**:
-   ```bash
-   curl -X POST "http://localhost:8000/ingest-multiverse" \
-        -H "Content-Type: application/json" \
-        -d '{
-          "query": "quantum mechanics",
-          "sources": ["wikipedia", "stackexchange", "arxiv", "wikidata"],
-          "max_per_source": 5
-        }'
-   ```
-
-2. **Specific Content Ingestion**:
-   ```bash
-   curl -X POST "http://localhost:8000/ingest-multiverse" \
-        -H "Content-Type: application/json" \
-        -d '{
-          "specific_content": {
-            "wikipedia_titles": ["Quantum mechanics", "Albert Einstein"],
-            "arxiv_ids": ["2304.01234", "2305.05678"],
-            "wikidata_ids": ["Q937", "Q42"]
-          }
-        }'
-   ```
-
-### Querying
-
-1. **Ask Questions**:
-   ```bash
-   curl -X POST "http://localhost:8000/query" \
-        -H "Content-Type: application/json" \
-        -d '{"query": "What is quantum mechanics and how does it differ from classical mechanics?"}'
-   ```
-
-2. **Use the Streamlit UI**:
-   - Navigate to http://localhost:8501
-   - Use the sidebar to ingest from multiple sources
-   - Ask questions in the main interface
-
-## Configuration
-
-Copy `env.example` to `.env` and modify settings:
-
-```env
-# Model Configuration
-EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
-RERANKER_MODEL=cross-encoder/ms-marco-MiniLM-L-6-v2
-OLLAMA_MODEL=wizardlm2:latest
-OLLAMA_HOST=http://localhost:11434
-
-# Retrieval Settings
-RETRIEVE_K=20          # Number of initial candidates
-RERANK_TOP_K=5         # Top documents after reranking
-CONTEXT_TOP_K=4        # Documents used in context
-
-# Quality Thresholds
-MIN_RERANK_SCORE=0.4   # Minimum rerank score for confidence
-MIN_CITATION_COVERAGE=0.6  # Minimum citation coverage
-```
-
-## Architecture
-
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Streamlit UI  │───▶│   FastAPI API    │───▶│   Ollama LLM    │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-                              │
-                              ▼
-                       ┌──────────────────┐
-                       │  Multi-Source    │
-                       │  Ingestion       │
-                       │  (Wikipedia,     │
-                       │   StackExchange,  │
-                       │   arXiv,         │
-                       │   Wikidata)      │
-                       └──────────────────┘
-                              │
-                              ▼
-                       ┌──────────────────┐
-                       │  Hybrid Retriever│
-                       │  (FAISS + BM25)  │
-                       └──────────────────┘
-                              │
-                              ▼
-                       ┌──────────────────┐
-                       │ Cross-Encoder    │
-                       │ Reranker         │
-                       └──────────────────┘
-                              │
-                              ▼
-                       ┌──────────────────┐
-                       │ Selective Re-ask │
-                       │ (Quality Check)  │
-                       └──────────────────┘
-```
-
-## API Endpoints
-
-- `POST /ingest` - Ingest documents from local paths
-- `POST /ingest-multiverse` - Ingest from multiple online sources
-- `POST /query` - Query the RAG system
-- `GET /docs` - API documentation (Swagger UI)
-
-## Testing
-
-Run the comprehensive test suite:
+### Step 1: Install Ollama
 
 ```bash
-python test_multiverse.py
+# Install Ollama
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# Pull the model
+ollama pull wizardlm2:latest
 ```
 
-This will test:
-- API connectivity
-- Individual source ingestion (Wikipedia, StackExchange, arXiv, Wikidata)
-- Multi-source ingestion
-- Query processing with proper citations
+### Step 2: Install Dependencies
 
-## Performance Features
+```bash
+# Create virtual environment (optional but recommended)
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-- **Caching**: SQLite-based query caching reduces redundant LLM calls
-- **Metrics**: JSON logging with latency tracking for monitoring
-- **Selective Re-ask**: Only refines answers when confidence is low
-- **Hybrid Search**: Combines semantic and keyword search for better recall
-- **Rate Limiting**: Built-in throttling for external APIs
-- **Error Handling**: Graceful degradation when sources are unavailable
-
-## Development
-
-### Project Structure
-```
-CiteRight/
-├── app/
-│   ├── main.py                    # FastAPI service
-│   ├── config.py                  # Settings
-│   ├── deps.py                    # Shared singletons
-│   ├── models.py                  # Pydantic models
-│   ├── logging_utils.py           # JSON logging
-│   └── rag/
-│       ├── ingest.py              # Local document ingestion
-│       ├── multiverse_ingester.py # Multi-source ingestion
-│       ├── wikipedia_ingester.py  # Wikipedia API client
-│       ├── stackexchange_ingester.py # StackExchange API client
-│       ├── arxiv_ingester.py      # arXiv API client
-│       ├── wikidata_ingester.py   # Wikidata API client
-│       ├── retriever.py           # Hybrid retrieval
-│       ├── reranker.py            # Cross-encoder reranking
-│       ├── generator.py           # Ollama LLM wrapper
-│       ├── caching.py             # SQLite cache
-│       ├── selective_reask.py     # Quality control
-│       └── utils.py               # Helper functions
-├── ui/
-│   └── streamlit_app.py           # Enhanced web UI
-├── .cursor/
-│   └── prompts.json               # CiteRight-Multiverse prompt
-├── data/
-│   └── sample_docs/               # Document storage
-├── requirements.txt
-├── docker-compose.yml
-├── test_multiverse.py             # Comprehensive test suite
-└── README.md
+# Install requirements
+pip install -r requirements.txt
 ```
 
-## Troubleshooting
+### Step 3: Start the Application
 
-1. **Ollama Connection Issues**: Ensure Ollama is running on port 11434
-2. **Model Not Found**: Run `ollama pull wizardlm2:latest`
-3. **API Rate Limits**: Some sources may have rate limits; the system includes throttling
-4. **Memory Issues**: Reduce `RETRIEVE_K` and `CONTEXT_TOP_K` in config
-5. **Network Issues**: Check internet connection for external API access
-6. **Import Errors**: Run `pip install -r requirements.txt` to install all dependencies
+**Terminal 1** - Start Ollama:
+```bash
+ollama serve
+```
 
-## License
+**Terminal 2** - Start the API:
+```bash
+source venv/bin/activate  # If using venv
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
 
-MIT License - feel free to use this project for your own multi-source RAG applications!
+**Terminal 3** - Start the UI:
+```bash
+source venv/bin/activate  # If using venv
+streamlit run ui/streamlit_app.py --server.port 8501 --server.address 0.0.0.0
+```
 
-## Contributing
+### Step 4: Open Your Browser
 
-Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests to enhance the multi-source capabilities.
+- **UI**: http://localhost:8501
+- **API Docs**: http://localhost:8000/docs
 
-## Quickstart
+## 📚 How to Use
 
-### Prerequisites
+### Basic Query
 
-1. **Install Ollama** and pull the wizardlm2 model:
-   ```bash
-   # Install Ollama (if not already installed)
-   curl -fsSL https://ollama.ai/install.sh | sh
-   
-   # Pull the model
-   ollama pull wizardlm2:latest
-   ```
+1. Open http://localhost:8501
+2. Type your question (e.g., "What is machine learning?")
+3. Select sources (Wikipedia, StackExchange, arXiv, Wikidata)
+4. Adjust "Max items per source" (default: 3)
+5. Click **Search** 🔍
 
-2. **Start Ollama service**:
-   ```bash
-   ollama serve
-   ```
+### Enable Quality Evaluation (Optional)
 
-### Option 1: Docker Compose (Recommended)
+- Check ☑️ "Enable Query Evaluation" 
+- Takes longer but shows:
+  - **Faithfulness Score**: How grounded the answer is
+  - **Citation Accuracy**: Correctness of attributions
+  - **Precision@k**: Relevance of retrieved content
 
-1. **Start everything**:
-   ```bash
-   docker compose up --build
-   ```
+### Upload Your Own PDFs
 
-2. **Access the application**:
-   - API: http://localhost:8000
-   - UI: http://localhost:8501
+1. Click **"Upload PDF"** in the sidebar
+2. Choose your PDF file
+3. Click **"Upload PDF"** button
+4. Your document is now searchable!
 
-### Option 2: Local Development
+## 🎯 Example Queries
 
-1. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+```
+"What is quantum mechanics?"
+"Explain lemmatization in NLP"
+"How does machine learning work?"
+"What are the key differences between Python and JavaScript?"
+```
 
-2. **Start the API**:
-   ```bash
-   uvicorn app.main:app --host 0.0.0.0 --port 8000
-   ```
+## 🔧 Configuration
 
-3. **Start the UI** (in another terminal):
-   ```bash
-   streamlit run ui/streamlit_app.py
-   ```
-
-## Usage
-
-1. **Ingest Documents**:
-   - Place your text files (.txt, .md) in `data/sample_docs/`
-   - Use the UI sidebar to ingest documents
-   - Or call the API directly: `POST /ingest` with `{"paths": ["./data/sample_docs"]}`
-
-2. **Ask Questions**:
-   - Use the Streamlit UI to ask questions
-   - Or call the API directly: `POST /query` with `{"query": "your question"}`
-
-## Configuration
-
-Copy `env.example` to `.env` and modify settings:
+Edit `.env` or `env.example` to customize:
 
 ```env
-# Model Configuration
+# Models
 EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
 RERANKER_MODEL=cross-encoder/ms-marco-MiniLM-L-6-v2
 OLLAMA_MODEL=wizardlm2:latest
-OLLAMA_HOST=http://localhost:11434
 
 # Retrieval Settings
-RETRIEVE_K=20          # Number of initial candidates
-RERANK_TOP_K=5         # Top documents after reranking
-CONTEXT_TOP_K=4        # Documents used in context
-
-# Quality Thresholds
-MIN_RERANK_SCORE=0.4   # Minimum rerank score for confidence
-MIN_CITATION_COVERAGE=0.6  # Minimum citation coverage
+RETRIEVE_K=20          # Initial candidates
+RERANK_TOP_K=5         # After reranking
+CONTEXT_TOP_K=4        # Used in prompt
 ```
 
-## Architecture
+## 📊 Data Sources
+
+| Source | Content | License | Max per Query |
+|--------|---------|---------|---------------|
+| **Wikipedia** | Encyclopedia | CC BY-SA 3.0 | 2 citations |
+| **StackExchange** | Q&A | CC BY-SA 4.0 | 2 citations |
+| **arXiv** | Research Papers | CC BY 4.0 | 2 citations |
+| **Wikidata** | Structured Data | CC0 1.0 | 2 citations |
+
+*Note: Citation diversity ensures balanced, multi-perspective answers*
+
+## 🏗️ Architecture
 
 ```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Streamlit UI  │───▶│   FastAPI API    │───▶│   Ollama LLM    │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-                              │
-                              ▼
-                       ┌──────────────────┐
-                       │  Hybrid Retriever│
-                       │  (FAISS + BM25)  │
-                       └──────────────────┘
-                              │
-                              ▼
-                       ┌──────────────────┐
-                       │ Cross-Encoder    │
-                       │ Reranker         │
-                       └──────────────────┘
-                              │
-                              ▼
-                       ┌──────────────────┐
-                       │ Selective Re-ask │
-                       │ (Quality Check)  │
-                       └──────────────────┘
+┌─────────────┐
+│ User Query  │
+└──────┬──────┘
+       │
+       ▼
+┌─────────────────────────┐
+│  Multi-Source Ingestion │
+│  (Wikipedia, Stack,     │
+│   arXiv, Wikidata)      │
+└──────────┬──────────────┘
+           │
+           ▼
+┌─────────────────────────┐
+│  Hybrid Retrieval       │
+│  (FAISS + BM25)         │
+└──────────┬──────────────┘
+           │
+           ▼
+┌─────────────────────────┐
+│  Reranking              │
+│  (Cross-Encoder)        │
+└──────────┬──────────────┘
+           │
+           ▼
+┌─────────────────────────┐
+│  Source Diversification │
+│  (Max 2 per source)     │
+└──────────┬──────────────┘
+           │
+           ▼
+┌─────────────────────────┐
+│  Generation             │
+│  (Ollama LLM)           │
+└──────────┬──────────────┘
+           │
+           ▼
+┌─────────────────────────┐
+│  Optional Evaluation    │
+│  (Quality Metrics)      │
+└──────────┬──────────────┘
+           │
+           ▼
+┌─────────────────────────┐
+│  Cited Answer           │
+└─────────────────────────┘
 ```
 
-## API Endpoints
+## 🛠️ Project Structure
 
-- `POST /ingest` - Ingest documents from specified paths
-- `POST /query` - Query the RAG system
-- `GET /docs` - API documentation (Swagger UI)
-
-## Performance Features
-
-- **Caching**: SQLite-based query caching reduces redundant LLM calls
-- **Metrics**: JSON logging with latency tracking for monitoring
-- **Selective Re-ask**: Only refines answers when confidence is low
-- **Hybrid Search**: Combines semantic and keyword search for better recall
-
-## Development
-
-### Project Structure
 ```
 CiteRight/
 ├── app/
-│   ├── main.py                    # FastAPI service
-│   ├── config.py                  # Settings
-│   ├── deps.py                    # Shared singletons
+│   ├── main.py                    # FastAPI backend
 │   ├── models.py                  # Pydantic models
-│   ├── logging_utils.py           # JSON logging
+│   ├── config.py                  # Settings
 │   └── rag/
-│       ├── ingest.py              # Document ingestion
-│       ├── retriever.py           # Hybrid retrieval
-│       ├── reranker.py            # Cross-encoder reranking
-│       ├── generator.py           # Ollama LLM wrapper
-│       ├── caching.py             # SQLite cache
-│       ├── selective_reask.py     # Quality control
+│       ├── multiverse_ingester.py # Multi-source ingestion
+│       ├── wikipedia_ingester.py  # Wikipedia API
+│       ├── stackexchange_ingester.py # Stack API
+│       ├── arxiv_ingester.py      # arXiv API
+│       ├── wikidata_ingester.py   # Wikidata API
+│       ├── pdf_processor.py       # PDF handling
+│       ├── retriever.py           # Hybrid search
+│       ├── reranker.py            # Cross-encoder
+│       ├── generator.py           # Ollama LLM
+│       ├── evaluator.py           # Quality metrics
 │       └── utils.py               # Helper functions
 ├── ui/
-│   └── streamlit_app.py           # Web UI
-├── data/
-│   └── sample_docs/               # Document storage
-├── requirements.txt
-├── docker-compose.yml
-└── README.md
+│   └── streamlit_app.py           # Web interface
+├── .cursor/
+│   └── prompts.json               # System prompts
+├── requirements.txt               # Dependencies
+└── README.md                      # This file
 ```
 
-## Troubleshooting
+## 🔍 API Endpoints
 
-1. **Ollama Connection Issues**: Ensure Ollama is running on port 11434
-2. **Model Not Found**: Run `ollama pull wizardlm2:latest`
-3. **Memory Issues**: Reduce `RETRIEVE_K` and `CONTEXT_TOP_K` in config
-4. **Slow Performance**: Enable caching and reduce chunk sizes
+### Query with Source Selection
+```bash
+curl -X POST "http://localhost:8000/query" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "What is machine learning?",
+    "sources": ["wikipedia", "stackexchange"],
+    "max_per_source": 3,
+    "enable_evaluation": false
+  }'
+```
 
-## License
+### Upload PDF
+```bash
+curl -X POST "http://localhost:8000/upload-pdf" \
+  -F "file=@/path/to/your/document.pdf"
+```
 
-MIT License - feel free to use this project for your own RAG applications!
+## ⚙️ Advanced Features
 
+### 1. Citation Diversity
+- Automatically limits to **2 citations per source**
+- Ensures multi-perspective answers
+- Prevents single-source dominance
+
+### 2. Quality Evaluation
+Enable to get:
+- **Faithfulness Score**: 0-1 scale of answer grounding
+- **Citation Accuracy**: Correctness of attributions  
+- **Precision@k**: Relevance of retrieved chunks
+- **Transparency Trace**: Sentence-level source mapping
+
+### 3. Selective Re-ask
+- Automatically refines low-confidence answers
+- Stricter citation requirements on second pass
+- Improves answer quality
+
+## 🐛 Troubleshooting
+
+### Ollama not found
+```bash
+# Check if Ollama is running
+curl http://localhost:11434/api/tags
+
+# If not, start it
+ollama serve
+```
+
+### Model not found
+```bash
+# Pull the model
+ollama pull wizardlm2:latest
+
+# List available models
+ollama list
+```
+
+### Port already in use
+```bash
+# Use different ports
+uvicorn app.main:app --port 8001
+streamlit run ui/streamlit_app.py --server.port 8502
+```
+
+### Slow responses
+- Disable evaluation (faster)
+- Reduce `max_per_source` (fewer API calls)
+- Use a smaller Ollama model: `ollama pull llama3.2:1b`
+
+## 📝 Requirements
+
+- **Python**: 3.9+
+- **Ollama**: Latest version
+- **RAM**: 8GB minimum (16GB recommended for wizardlm2)
+- **Storage**: 5GB for model + embeddings
+
+## 🔐 Privacy
+
+✅ **100% Local Processing**
+- All LLM inference happens on your machine
+- No data sent to external LLM APIs
+- Source content fetched from public APIs only
+
+## 📄 License
+
+MIT License - Feel free to use for your own projects!
+
+## 🤝 Contributing
+
+Issues and pull requests welcome! This project demonstrates:
+- Multi-source RAG architecture
+- Hybrid retrieval systems
+- Citation diversity mechanisms
+- Quality evaluation frameworks
+- Local LLM integration
+
+## 🙏 Acknowledgments
+
+Built with:
+- [Ollama](https://ollama.ai) - Local LLM runtime
+- [LangChain](https://langchain.com) - RAG framework
+- [FAISS](https://faiss.ai) - Vector search
+- [Sentence Transformers](https://www.sbert.net) - Embeddings
+- [FastAPI](https://fastapi.tiangolo.com) - Backend API
+- [Streamlit](https://streamlit.io) - Web UI
+
+---
+
+**Made with ❤️ for accurate, well-cited AI responses**
