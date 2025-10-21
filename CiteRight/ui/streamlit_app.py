@@ -33,7 +33,7 @@ with st.sidebar:
 
 # Main query interface
 
-query = st.text_input("Ask a question", placeholder="What is lemmatization? How does it work?")
+query = st.text_input("Ask a question", placeholder="What is quantum mechanics?")
 
 # Source selection for query
 st.subheader(" Sources")
@@ -46,6 +46,9 @@ with col2:
     query_wikidata = st.checkbox("Wikidata", value=st.session_state.sources_selected['wikidata'], key="query_wikidata")
 
 query_max_per_source = st.slider("Max items per source", 1, 10, 3, key="query_max")
+
+# Evaluation toggle
+enable_evaluation = st.checkbox("Enable Query Evaluation (slower)", value=False)
 
 if st.button("🔍 Search") and query:
     # Save current selections to session state
@@ -71,7 +74,8 @@ if st.button("🔍 Search") and query:
         payload = {
             "query": query,
             "sources": selected_sources,
-            "max_per_source": query_max_per_source
+            "max_per_source": query_max_per_source,
+            "enable_evaluation": enable_evaluation
         }
         r = requests.post(f"{API}/query", json=payload)
         if r.ok:
@@ -79,6 +83,19 @@ if st.button("🔍 Search") and query:
             
             st.subheader("📝 Answer")
             st.write(out["answer"])
+            
+            # Display evaluation metrics if available
+            if out.get("evaluation") and not out["evaluation"].get("evaluation_failed"):
+                eval_data = out["evaluation"]
+                st.info("**Quality Metrics**")
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Faithfulness", f"{eval_data.get('faithfulness_score', 0):.2f}")
+                with col2:
+                    st.metric("Citation Accuracy", f"{eval_data.get('citation_accuracy', 0):.2f}")
+                with col3:
+                    st.metric("Precision@k", f"{eval_data.get('precision_at_k', 0):.2f}")
+                
                 
             st.subheader("Sources")
             for i, c in enumerate(out["citations"]):

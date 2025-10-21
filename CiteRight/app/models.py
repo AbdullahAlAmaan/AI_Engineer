@@ -9,12 +9,14 @@ class QueryRequest(BaseModel):
     top_k: Optional[int] = None
     sources: Optional[List[str]] = None
     max_per_source: Optional[int] = 5
+    enable_evaluation: Optional[bool] = False
 
 class QueryResponse(BaseModel):
     answer: str
     citations: list
     used_reask: bool
     timings_ms: dict
+    evaluation: Optional[Dict[str, Any]] = None
 
 class MultiverseIngestRequest(BaseModel):
     query: Optional[str] = None

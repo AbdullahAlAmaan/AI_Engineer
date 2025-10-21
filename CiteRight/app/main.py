@@ -10,11 +10,12 @@ from app.rag.reranker import CrossEncoderReranker
 from app.rag.generator import generate_with_ollama
 from app.rag.selective_reask import should_reask
 from app.rag.utils import build_context, format_citations, chunk_text
+from app.rag.evaluator import evaluate_answer
 from app.logging_utils import timer, log_json
 from app.deps import reranker, cache, vectorstore
 from app.config import settings
 
-app = FastAPI(title="CiteRight-Multiverse RAG Assistant")
+app = FastAPI(title="CiteRight")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 @app.post("/ingest")
@@ -173,6 +174,15 @@ def query(req: QueryRequest):
 
     cites = format_citations(top_docs)
 
-    log_json({"metric": "query", "used_reask": used_reask})
-    return QueryResponse(answer=answer, citations=cites, used_reask=used_reask, timings_ms=timings)
+    # Optional evaluation layer
+    evaluation = None
+    if req.enable_evaluation:
+        with timer("evaluate"):
+            evaluation = evaluate_answer(q, context, answer)
+            # Use evaluated answer if available
+            if evaluation and not evaluation.get("evaluation_failed"):
+                answer = evaluation.get("final_answer", answer)
+
+    log_json({"metric": "query", "used_reask": used_reask, "evaluation_enabled": req.enable_evaluation})
+    return QueryResponse(answer=answer, citations=cites, used_reask=used_reask, timings_ms=timings, evaluation=evaluation)
 
