@@ -6,6 +6,15 @@ API = os.getenv("API_URL", "http://localhost:8000")
 st.set_page_config(page_title="CiteRight-Multiverse", layout="centered")
 st.title("CiteRight")
 
+# Initialize session state for source selection
+if 'sources_selected' not in st.session_state:
+    st.session_state.sources_selected = {
+        'wikipedia': True,
+        'stackexchange': True, 
+        'arxiv': True,
+        'wikidata': True
+    }
+
 # Sidebar for PDF upload only
 with st.sidebar:
     st.subheader("Upload PDF")
@@ -30,15 +39,23 @@ query = st.text_input("Ask a question", placeholder="What is lemmatization? How 
 st.subheader(" Sources")
 col1, col2 = st.columns(2)
 with col1:
-    query_wikipedia = st.checkbox("Wikipedia", value=True, key="query_wiki")
-    query_stackexchange = st.checkbox("StackExchange", value=True, key="query_stack")
+    query_wikipedia = st.checkbox("Wikipedia", value=st.session_state.sources_selected['wikipedia'], key="query_wiki")
+    query_stackexchange = st.checkbox("StackExchange", value=st.session_state.sources_selected['stackexchange'], key="query_stack")
 with col2:
-    query_arxiv = st.checkbox("arXiv", value=True, key="query_arxiv")
-    query_wikidata = st.checkbox("Wikidata", value=True, key="query_wikidata")
+    query_arxiv = st.checkbox("arXiv", value=st.session_state.sources_selected['arxiv'], key="query_arxiv")
+    query_wikidata = st.checkbox("Wikidata", value=st.session_state.sources_selected['wikidata'], key="query_wikidata")
 
 query_max_per_source = st.slider("Max items per source", 1, 10, 3, key="query_max")
 
 if st.button("🔍 Search") and query:
+    # Save current selections to session state
+    st.session_state.sources_selected = {
+        'wikipedia': query_wikipedia,
+        'stackexchange': query_stackexchange,
+        'arxiv': query_arxiv,
+        'wikidata': query_wikidata
+    }
+    
     # Prepare selected sources
     selected_sources = []
     if query_wikipedia:
