@@ -10,17 +10,17 @@ data = pd.read_csv("Mall_Customers.csv")
 X = data[['Annual Income (k$)', 'Spending Score (1-100)']].values
 
 # 2. Standardize the data
-scaler = StandardScaler()
+scaler = StandardScaler() 
 X_scaled = scaler.fit_transform(X)
 
 # 3. Elbow method to find optimal number of clusters
 inertia = []
-for k in range(1, 11):
+for k in range(1, 31):
     kmeans = KMeans(n_clusters=k, random_state=42)
     kmeans.fit(X_scaled)
     inertia.append(kmeans.inertia_)
 
-plt.plot(range(1, 11), inertia, marker='o')
+plt.plot(range(1, 31), inertia, marker='o')
 plt.xlabel('Number of Clusters')
 plt.ylabel('Inertia')
 plt.title('Elbow Method')

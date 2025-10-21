@@ -27,3 +27,12 @@ coverage.xml
 data/index/
 data/cache.sqlite
 streamlit.log
+
+# User uploaded files
+*.pdf
+*.docx
+*.doc
+
+# IDE
+.vscode/
+.idea/

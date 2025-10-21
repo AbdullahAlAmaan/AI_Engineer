@@ -42,7 +42,7 @@ model = SimpleNN()
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(model.parameters(), lr=0.001)
 
-epochs = 5
+epochs = 10
 for epoch in range(epochs):
     for images, labels in train_loader:
         outputs = model(images)

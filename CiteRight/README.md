@@ -1,123 +1,157 @@
 # CiteRight 🎯
 
-A multi-source RAG (Retrieval-Augmented Generation) assistant that pulls content from **Wikipedia, StackExchange, arXiv, and Wikidata** for accurate, well-cited answers.
+A multi-source RAG (Retrieval-Augmented Generation) system that provides accurate, well-cited answers from **Wikipedia, StackExchange, arXiv, and Wikidata**—or exclusively from your uploaded PDFs.
 
 ## ✨ Key Features
 
-- **Multi-Source Intelligence**: Pulls from 4 authoritative sources
-- **Fresh Data Every Time**: No stale cached results
-- **Citation Diversity**: Maximum 2 citations per source for balanced answers
-- **Quality Evaluation**: Optional metrics (faithfulness, accuracy, precision)
-- **PDF Upload**: Add your own documents
-- **Local & Private**: Everything runs on your machine with Ollama
+- **Multi-Source Intelligence**: Pull from 4 authoritative sources (Wikipedia, StackExchange, arXiv, Wikidata)
+- **PDF-Only Mode**: Search exclusively in your uploaded documents with zero external contamination
+- **Citation Diversity**: Maximum 2 citations per source for balanced, multi-perspective answers
+- **Fresh Data**: No caching - every query fetches current, relevant content
+- **Quality Evaluation**: Optional metrics (faithfulness, accuracy, precision) with transparency traces
+- **100% Local & Private**: Runs entirely on your machine using Ollama - no external API calls
+- **Hybrid Retrieval**: FAISS (semantic) + BM25 (keyword) + Cross-Encoder reranking
 
-## 🚀 Quick Start (3 Steps)
+## 🚀 Quick Start
 
-### Step 1: Install Ollama
+### Prerequisites
+- Python 3.9+
+- Ollama ([Install](https://ollama.ai))
 
+### Installation
+
+**1. Install Ollama and pull the model:**
 ```bash
-# Install Ollama
+# Install Ollama (if not already installed)
 curl -fsSL https://ollama.ai/install.sh | sh
 
-# Pull the model
+# Pull the LLM model
 ollama pull wizardlm2:latest
+
+# Start Ollama
+ollama serve
 ```
 
-### Step 2: Install Dependencies
-
+**2. Set up the project:**
 ```bash
-# Create virtual environment (optional but recommended)
+# Clone the repository
+git clone <your-repo-url>
+cd CiteRight
+
+# Create virtual environment
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install requirements
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### Step 3: Start the Application
+**3. Start the application:**
 
-**Terminal 1** - Start Ollama:
+Open **3 terminal windows**:
+
+**Terminal 1** - Ollama (if not already running):
 ```bash
 ollama serve
 ```
 
-**Terminal 2** - Start the API:
+**Terminal 2** - API Backend:
 ```bash
-source venv/bin/activate  # If using venv
+source venv/bin/activate
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-**Terminal 3** - Start the UI:
+**Terminal 3** - Streamlit UI:
 ```bash
-source venv/bin/activate  # If using venv
+source venv/bin/activate
 streamlit run ui/streamlit_app.py --server.port 8501 --server.address 0.0.0.0
 ```
 
-### Step 4: Open Your Browser
-
+**4. Open your browser:**
 - **UI**: http://localhost:8501
 - **API Docs**: http://localhost:8000/docs
 
-## 📚 How to Use
+## 📖 How to Use
 
-### Basic Query
+### Basic Query with External Sources
 
 1. Open http://localhost:8501
-2. Type your question (e.g., "What is machine learning?")
+2. Type your question (e.g., "What is quantum mechanics?")
 3. Select sources (Wikipedia, StackExchange, arXiv, Wikidata)
 4. Adjust "Max items per source" (default: 3)
-5. Click **Search** 🔍
+5. Click **🔍 Search**
+
+### PDF-Only Mode (Your Documents)
+
+1. **Upload PDF**: Click "Upload PDF" in sidebar → Choose file → Upload
+2. **Enable PDF-only**: Check "Search in uploaded PDFs only"
+3. **Ask question**: Type your question about the PDF content
+4. **Search**: Click **🔍 Search** - results will come ONLY from your PDF
 
 ### Enable Quality Evaluation (Optional)
 
-- Check ☑️ "Enable Query Evaluation" 
-- Takes longer but shows:
-  - **Faithfulness Score**: How grounded the answer is
+- Check "Enable Query Evaluation" to get:
+  - **Faithfulness Score**: How grounded the answer is (0-1)
   - **Citation Accuracy**: Correctness of attributions
   - **Precision@k**: Relevance of retrieved content
+  - **Transparency Trace**: Sentence-level source mapping
 
-### Upload Your Own PDFs
+## 🎯 Example Use Cases
 
-1. Click **"Upload PDF"** in the sidebar
-2. Choose your PDF file
-3. Click **"Upload PDF"** button
-4. Your document is now searchable!
-
-## 🎯 Example Queries
-
+### Research & Fact-Checking
 ```
-"What is quantum mechanics?"
-"Explain lemmatization in NLP"
-"How does machine learning work?"
-"What are the key differences between Python and JavaScript?"
+Query: "What are the key principles of quantum mechanics?"
+Sources: Wikipedia + arXiv
+Result: Scholarly answer with academic citations
 ```
 
-## 🔧 Configuration
+### Technical Q&A
+```
+Query: "How does FAISS indexing work?"
+Sources: StackExchange + Wikipedia
+Result: Practical explanation with community insights
+```
 
-Edit `.env` or `env.example` to customize:
+### Private Document Analysis
+```
+Upload: Your resume/report/paper
+PDF-Only Mode: Enabled
+Query: "What are the key technical skills mentioned?"
+Result: Answer ONLY from your document - no hallucinations
+```
+
+## ⚙️ Configuration
+
+Edit `env.example` (or create `.env`):
 
 ```env
 # Models
 EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
 RERANKER_MODEL=cross-encoder/ms-marco-MiniLM-L-6-v2
 OLLAMA_MODEL=wizardlm2:latest
+OLLAMA_HOST=http://localhost:11434
 
 # Retrieval Settings
 RETRIEVE_K=20          # Initial candidates
 RERANK_TOP_K=5         # After reranking
 CONTEXT_TOP_K=4        # Used in prompt
+
+# Chunking
+CHUNK_SIZE=900
+CHUNK_OVERLAP=180
 ```
 
 ## 📊 Data Sources
 
-| Source | Content | License | Max per Query |
-|--------|---------|---------|---------------|
-| **Wikipedia** | Encyclopedia | CC BY-SA 3.0 | 2 citations |
-| **StackExchange** | Q&A | CC BY-SA 4.0 | 2 citations |
-| **arXiv** | Research Papers | CC BY 4.0 | 2 citations |
-| **Wikidata** | Structured Data | CC0 1.0 | 2 citations |
+| Source | Content | License | Max Citations per Query |
+|--------|---------|---------|------------------------|
+| **Wikipedia** | Encyclopedia articles | CC BY-SA 3.0 | 2 |
+| **StackExchange** | Q&A discussions | CC BY-SA 4.0 | 2 |
+| **arXiv** | Research papers | CC BY 4.0 | 2 |
+| **Wikidata** | Structured data | CC0 1.0 | 2 |
+| **User PDFs** | Your documents | User Provided | Unlimited |
 
-*Note: Citation diversity ensures balanced, multi-perspective answers*
+*Citation diversity ensures balanced, multi-perspective answers*
 
 ## 🏗️ Architecture
 
@@ -128,9 +162,15 @@ CONTEXT_TOP_K=4        # Used in prompt
        │
        ▼
 ┌─────────────────────────┐
-│  Multi-Source Ingestion │
-│  (Wikipedia, Stack,     │
-│   arXiv, Wikidata)      │
+│  Source Selection       │
+│  (Wiki/Stack/arXiv/     │
+│   Wikidata/PDF-only)    │
+└──────────┬──────────────┘
+           │
+           ▼
+┌─────────────────────────┐
+│  Dynamic Ingestion      │
+│  (Fresh content fetch)  │
 └──────────┬──────────────┘
            │
            ▼
@@ -178,13 +218,13 @@ CiteRight/
 │   ├── models.py                  # Pydantic models
 │   ├── config.py                  # Settings
 │   └── rag/
-│       ├── multiverse_ingester.py # Multi-source ingestion
+│       ├── multiverse_ingester.py # Multi-source orchestrator
 │       ├── wikipedia_ingester.py  # Wikipedia API
-│       ├── stackexchange_ingester.py # Stack API
+│       ├── stackexchange_ingester.py # StackExchange API
 │       ├── arxiv_ingester.py      # arXiv API
 │       ├── wikidata_ingester.py   # Wikidata API
 │       ├── pdf_processor.py       # PDF handling
-│       ├── retriever.py           # Hybrid search
+│       ├── retriever.py           # Hybrid search (FAISS + BM25)
 │       ├── reranker.py            # Cross-encoder
 │       ├── generator.py           # Ollama LLM
 │       ├── evaluator.py           # Quality metrics
@@ -194,6 +234,7 @@ CiteRight/
 ├── .cursor/
 │   └── prompts.json               # System prompts
 ├── requirements.txt               # Dependencies
+├── EVALUATOR.md                   # Evaluation system docs
 └── README.md                      # This file
 ```
 
@@ -207,34 +248,26 @@ curl -X POST "http://localhost:8000/query" \
     "query": "What is machine learning?",
     "sources": ["wikipedia", "stackexchange"],
     "max_per_source": 3,
-    "enable_evaluation": false
+    "enable_evaluation": false,
+    "pdf_only": false
+  }'
+```
+
+### Query PDF-Only Mode
+```bash
+curl -X POST "http://localhost:8000/query" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "What are the key skills?",
+    "pdf_only": true
   }'
 ```
 
 ### Upload PDF
 ```bash
 curl -X POST "http://localhost:8000/upload-pdf" \
-  -F "file=@/path/to/your/document.pdf"
+  -F "file=@/path/to/document.pdf"
 ```
-
-## ⚙️ Advanced Features
-
-### 1. Citation Diversity
-- Automatically limits to **2 citations per source**
-- Ensures multi-perspective answers
-- Prevents single-source dominance
-
-### 2. Quality Evaluation
-Enable to get:
-- **Faithfulness Score**: 0-1 scale of answer grounding
-- **Citation Accuracy**: Correctness of attributions  
-- **Precision@k**: Relevance of retrieved chunks
-- **Transparency Trace**: Sentence-level source mapping
-
-### 3. Selective Re-ask
-- Automatically refines low-confidence answers
-- Stricter citation requirements on second pass
-- Improves answer quality
 
 ## 🐛 Troubleshooting
 
@@ -266,7 +299,12 @@ streamlit run ui/streamlit_app.py --server.port 8502
 ### Slow responses
 - Disable evaluation (faster)
 - Reduce `max_per_source` (fewer API calls)
-- Use a smaller Ollama model: `ollama pull llama3.2:1b`
+- Use smaller Ollama model: `ollama pull llama3.2:1b`
+
+### PDF not being searched
+1. Make sure PDF is uploaded first (check sidebar)
+2. Enable "Search in uploaded PDFs only" checkbox
+3. The system will filter to ONLY User Upload sources
 
 ## 📝 Requirements
 
@@ -275,25 +313,48 @@ streamlit run ui/streamlit_app.py --server.port 8502
 - **RAM**: 8GB minimum (16GB recommended for wizardlm2)
 - **Storage**: 5GB for model + embeddings
 
-## 🔐 Privacy
+## 🔐 Privacy & Security
 
 ✅ **100% Local Processing**
-- All LLM inference happens on your machine
+- All LLM inference on your machine
 - No data sent to external LLM APIs
 - Source content fetched from public APIs only
 
-## 📄 License
+✅ **PDF Privacy**
+- Uploaded PDFs stay local
+- Never sent to external services
+- Cleared with vectorstore unless in PDF-only mode
 
-MIT License - Feel free to use for your own projects!
+## 🎓 Advanced Features
+
+### Citation Diversity
+- Automatically limits to 2 citations per source
+- Ensures balanced, multi-perspective answers
+- Prevents single-source dominance
+
+### Selective Re-ask
+- Detects low-confidence answers
+- Automatically refines with stricter citations
+- No user intervention needed
+
+### Quality Evaluation
+- LLM-based answer auditing
+- Grounding verification
+- Cross-source synthesis
+- Adaptive tone adjustment
 
 ## 🤝 Contributing
 
-Issues and pull requests welcome! This project demonstrates:
+This project demonstrates:
 - Multi-source RAG architecture
 - Hybrid retrieval systems
 - Citation diversity mechanisms
 - Quality evaluation frameworks
 - Local LLM integration
+
+## 📄 License
+
+MIT License - Feel free to use for your own projects!
 
 ## 🙏 Acknowledgments
 
