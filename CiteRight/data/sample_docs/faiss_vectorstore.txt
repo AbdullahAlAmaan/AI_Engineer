@@ -16,3 +16,4 @@ Memory Management: The library provides efficient memory management and supports
 
 FAISS is particularly useful in RAG systems where you need to quickly retrieve the most relevant document chunks from a large corpus based on semantic similarity to the user's query.
 
+The library was developed by Facebook AI Research and is open-source under the MIT license. It has become a standard tool in the machine learning community for vector similarity search applications.

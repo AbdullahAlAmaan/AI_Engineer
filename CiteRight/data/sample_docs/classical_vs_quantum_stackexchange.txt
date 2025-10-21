@@ -1,0 +1,19 @@
+Question: What is the difference between classical and quantum mechanics?
+
+Answer: Classical mechanics describes the motion of macroscopic objects using Newton's laws, while quantum mechanics describes the behavior of matter and energy at atomic and subatomic scales.
+
+Key differences:
+
+1. Determinism vs. Probability: Classical mechanics is deterministic - given initial conditions, you can predict exact future states. Quantum mechanics is probabilistic - you can only predict probabilities of different outcomes.
+
+2. Continuous vs. Discrete: Classical physics treats energy and other quantities as continuous. Quantum mechanics shows that energy comes in discrete packets called quanta.
+
+3. Measurement: In classical physics, measurement doesn't affect the system being measured. In quantum mechanics, measurement fundamentally changes the system (wave function collapse).
+
+4. Superposition: Classical objects exist in definite states. Quantum particles can exist in superposition - multiple states simultaneously until measured.
+
+5. Uncertainty: Classical physics allows precise measurement of all properties. Quantum mechanics has fundamental limits (Heisenberg uncertainty principle).
+
+The transition from classical to quantum behavior occurs at the Planck scale, roughly 10^-35 meters. At everyday scales, quantum effects are negligible and classical mechanics provides excellent approximations.
+
+This is why we can use classical physics for engineering bridges and cars, but need quantum mechanics for understanding atoms, lasers, and semiconductors.

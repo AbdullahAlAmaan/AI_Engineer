@@ -24,12 +24,26 @@ def ingest_paths(paths: Iterable[str]):
                 txt = _read_file(f)
                 for ch in chunk_text(txt):
                     texts.append(ch)
-                    metas.append({"source": str(f)})
+                    # Enhanced metadata for CiteRight-Multiverse
+                    metas.append({
+                        "source": f.name,
+                        "origin": "Local Document",
+                        "license": "Unknown",
+                        "url": "",
+                        "path": str(f)
+                    })
         else:
             txt = _read_file(p)
             for ch in chunk_text(txt):
                 texts.append(ch)
-                metas.append({"source": str(p)})
+                # Enhanced metadata for CiteRight-Multiverse
+                metas.append({
+                    "source": p.name,
+                    "origin": "Local Document", 
+                    "license": "Unknown",
+                    "url": "",
+                    "path": str(p)
+                })
 
     if texts:
         vs.add_texts(texts=texts, metadatas=metas)

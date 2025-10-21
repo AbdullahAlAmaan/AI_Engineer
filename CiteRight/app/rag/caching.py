@@ -20,4 +20,8 @@ class SqliteCache:
     def set(self, q: str, answer: str, citations: list):
         with sqlite3.connect(self.path) as con:
             con.execute("REPLACE INTO cache (q, answer, citations, ts) VALUES (?,?,?,?)", (q, answer, json.dumps(citations), time.time()))
+    
+    def clear_all(self):
+        with sqlite3.connect(self.path) as con:
+            con.execute("DELETE FROM cache")
 

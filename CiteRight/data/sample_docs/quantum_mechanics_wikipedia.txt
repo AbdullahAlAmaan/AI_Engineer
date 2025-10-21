@@ -1,0 +1,14 @@
+Quantum mechanics is a fundamental theory in physics that describes the physical properties of nature at the scale of atoms and subatomic particles. It is the foundation of all quantum physics including quantum chemistry, quantum field theory, quantum technology, and quantum information science.
+
+The theory was developed in the early 20th century by physicists including Max Planck, Albert Einstein, Niels Bohr, Werner Heisenberg, and Erwin Schrödinger. Planck introduced the concept of quantized energy in 1900, which marked the beginning of quantum theory.
+
+Key principles of quantum mechanics include:
+
+1. Wave-particle duality: Matter exhibits both wave and particle properties
+2. Uncertainty principle: Formulated by Heisenberg in 1927, it states that certain pairs of physical properties cannot be simultaneously measured with arbitrary precision
+3. Superposition: Quantum systems can exist in multiple states simultaneously until measured
+4. Entanglement: Quantum particles can be correlated in ways that classical physics cannot explain
+
+The mathematical formulation of quantum mechanics uses complex numbers and linear algebra. The Schrödinger equation describes how quantum systems evolve over time, while operators represent physical observables.
+
+Quantum mechanics has been experimentally verified countless times and is considered one of the most successful theories in physics. It has led to numerous technological applications including lasers, transistors, MRI machines, and quantum computers.

@@ -12,9 +12,21 @@ scikit-learn==1.5.1
 scipy==1.13.1
 pandas==2.2.2
 python-multipart==0.0.9
-requests==2.32.3
+requests>=2.27.0,<3.0.0
 streamlit==1.37.1
 ollama==0.3.0
 sqlite-utils==3.36
 orjson==3.10.7
+# Web scraping and API libraries for CiteRight-Multiverse
+beautifulsoup4==4.12.2
+wikipedia==1.4.0
+wikidata==0.6.0
+stackapi==0.2.0
+arxiv>=2.0.0,<3.0.0
+lxml==4.9.3
+html5lib==1.1
+feedparser==6.0.10
+# PDF processing for user uploads
+pypdf==4.0.1
+python-multipart==0.0.9
 
