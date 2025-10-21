@@ -129,23 +129,29 @@ def upload_pdf(file: UploadFile = File(...)):
 def query(req: QueryRequest):
     q = req.query.strip()
 
-    # Always clear cache and vectorstore for fresh results
-    cache().clear_all()
-    
-    # Clear existing vectorstore to start fresh
-    from app.deps import embeddings
-    from langchain_community.vectorstores import FAISS
-    vs = FAISS.from_texts([""], embeddings())
-    vs.save_local(settings.VECTOR_INDEX_PATH)
+    # PDF-only mode: Don't clear, don't ingest, just filter results later
+    if req.pdf_only:
+        log_json({"metric": "query_mode", "mode": "pdf_only", "query": q})
+        # Skip clearing and ingestion - we'll filter by origin="User Upload" later
+        
+    else:
+        # Always clear cache and vectorstore for fresh results
+        cache().clear_all()
+        
+        # Clear existing vectorstore to start fresh
+        from app.deps import embeddings
+        from langchain_community.vectorstores import FAISS
+        vs = FAISS.from_texts([""], embeddings())
+        vs.save_local(settings.VECTOR_INDEX_PATH)
 
-    # If sources are specified, ingest content from those sources first
-    if req.sources:
-        log_json({"metric": "query_sources", "sources": req.sources, "query": q})
-        ingest_multiverse_content(
-            query=q,
-            sources=req.sources,
-            max_per_source=req.max_per_source
-        )
+        # If sources are specified, ingest content from those sources first
+        if req.sources:
+            log_json({"metric": "query_sources", "sources": req.sources, "query": q})
+            ingest_multiverse_content(
+                query=q,
+                sources=req.sources,
+                max_per_source=req.max_per_source
+            )
 
     timings = {}
 
@@ -153,12 +159,18 @@ def query(req: QueryRequest):
     with timer("retrieve"):
         candidates = hybrid_search(q, k=req.top_k or settings.RETRIEVE_K)
 
+    # PDF-only mode: Filter to only User Upload documents
+    if req.pdf_only:
+        candidates = [doc for doc in candidates if doc.metadata.get('origin') == 'User Upload']
+        log_json({"metric": "pdf_only_filter", "original_count": len(candidates), "filtered_count": len(candidates)})
+
     # Rerank
     with timer("rerank"):
         top_docs, scores = reranker().rerank(q, candidates, top_k=settings.RERANK_TOP_K)
     
-    # Diversify sources to ensure balanced representation
-    top_docs = diversify_sources(top_docs, max_per_source=2)
+    # Diversify sources to ensure balanced representation (skip if pdf_only)
+    if not req.pdf_only:
+        top_docs = diversify_sources(top_docs, max_per_source=2)
 
     # Context build
     context = build_context(top_docs, settings.CONTEXT_TOP_K)

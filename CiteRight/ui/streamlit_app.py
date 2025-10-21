@@ -35,17 +35,28 @@ with st.sidebar:
 
 query = st.text_input("Ask a question", placeholder="What is quantum mechanics?")
 
-# Source selection for query
-st.subheader(" Sources")
-col1, col2 = st.columns(2)
-with col1:
-    query_wikipedia = st.checkbox("Wikipedia", value=st.session_state.sources_selected['wikipedia'], key="query_wiki")
-    query_stackexchange = st.checkbox("StackExchange", value=st.session_state.sources_selected['stackexchange'], key="query_stack")
-with col2:
-    query_arxiv = st.checkbox("arXiv", value=st.session_state.sources_selected['arxiv'], key="query_arxiv")
-    query_wikidata = st.checkbox("Wikidata", value=st.session_state.sources_selected['wikidata'], key="query_wikidata")
+# PDF-only mode toggle (at the top)
+pdf_only = st.checkbox("Search in uploaded PDFs only", value=False)
 
-query_max_per_source = st.slider("Max items per source", 1, 10, 3, key="query_max")
+if not pdf_only:
+    # Source selection for query (only show when NOT in PDF-only mode)
+    st.subheader(" Sources")
+    col1, col2 = st.columns(2)
+    with col1:
+        query_wikipedia = st.checkbox("Wikipedia", value=st.session_state.sources_selected['wikipedia'], key="query_wiki")
+        query_stackexchange = st.checkbox("StackExchange", value=st.session_state.sources_selected['stackexchange'], key="query_stack")
+    with col2:
+        query_arxiv = st.checkbox("arXiv", value=st.session_state.sources_selected['arxiv'], key="query_arxiv")
+        query_wikidata = st.checkbox("Wikidata", value=st.session_state.sources_selected['wikidata'], key="query_wikidata")
+
+    query_max_per_source = st.slider("Max items per source", 1, 10, 3, key="query_max")
+else:
+    # Set defaults when in PDF-only mode
+    query_wikipedia = False
+    query_stackexchange = False
+    query_arxiv = False
+    query_wikidata = False
+    query_max_per_source = 0
 
 # Evaluation toggle
 enable_evaluation = st.checkbox("Enable Query Evaluation (slower)", value=False)
@@ -73,9 +84,10 @@ if st.button("🔍 Search") and query:
     with st.spinner("Thinking..."):
         payload = {
             "query": query,
-            "sources": selected_sources,
+            "sources": selected_sources if not pdf_only else [],
             "max_per_source": query_max_per_source,
-            "enable_evaluation": enable_evaluation
+            "enable_evaluation": enable_evaluation,
+            "pdf_only": pdf_only
         }
         r = requests.post(f"{API}/query", json=payload)
         if r.ok:

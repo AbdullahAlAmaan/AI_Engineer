@@ -10,6 +10,7 @@ class QueryRequest(BaseModel):
     sources: Optional[List[str]] = None
     max_per_source: Optional[int] = 5
     enable_evaluation: Optional[bool] = False
+    pdf_only: Optional[bool] = False  # Only search uploaded PDFs
 
 class QueryResponse(BaseModel):
     answer: str
